@@ -16,7 +16,7 @@ What changed
 
 Files of interest
 
-- `single_app.py` — (optional) a single runnable FastAPI app that serves `backend/index.html` and implements the `/send-excel-mails` and `/send-manual-mails` endpoints. Use this if you want a single-file deployment.
+- `main.py` — (optional) a single runnable FastAPI app that serves `backend/index.html` and implements the `/send-excel-mails` and `/send-manual-mails` endpoints. Use this if you want a single-file deployment.
 - `backend/main.py` — original FastAPI app (if you prefer running the backend and serving static files with another server).
 - `backend/index.html` — the inlined frontend (open directly or served by the backend).
 - `backend/email_sender.py` — SendGrid integration for sending emails.
