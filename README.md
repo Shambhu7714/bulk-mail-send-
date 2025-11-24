@@ -1,109 +1,78 @@
+git commit -m "Add backend files into root repo"
 # Bulk Mail Sender
 
 A small project for sending personalized voucher emails in bulk using an Excel file or manual entry.
 
-Project structure
+Current repository layout (consolidated)
 
-- `backend/` — Python backend (API endpoints to accept Excel uploads or manual requests and send emails).
-- `frontend/` — Static frontend (HTML + JS) to upload Excel files, enter email template and trigger sending.
+- `single_app.py` — Optional single-file server (at repository root). When run this serves the frontend and exposes the same API endpoints; useful for easy single-file deployment.
+- `backend/` — Primary backend folder. It now contains `index.html` (the full frontend inlined), backend Python code (`main.py`, `email_sender.py`, `config.py`), and `requirements.txt`.
 
-Features
+What changed
 
-- Send personalized emails by uploading an Excel with columns `Executive Name`, `Email`, `Voucher Amount`.
-- Manual mode for sending to a comma-separated list of emails with a single name/amount.
-- Simple logging output in the UI.
-- A sample Excel download button in the frontend (creates a CSV/XLSX-styled template).
+- The frontend was consolidated into the backend: `backend/index.html` is a single-file frontend with CSS and JS inlined.
+- The previous `frontend/` files have been removed and the repository includes the consolidated version under `backend/`.
+- A branch named `mail-send` was created that contains this consolidation (you can find it on the remote).
 
-Quick start (Windows, PowerShell)
+Files of interest
 
-1. Backend (Python)
+- `single_app.py` — (optional) a single runnable FastAPI app that serves `backend/index.html` and implements the `/send-excel-mails` and `/send-manual-mails` endpoints. Use this if you want a single-file deployment.
+- `backend/main.py` — original FastAPI app (if you prefer running the backend and serving static files with another server).
+- `backend/index.html` — the inlined frontend (open directly or served by the backend).
+- `backend/email_sender.py` — SendGrid integration for sending emails.
+- `backend/config.py` — environment-based settings (SENDGRID_API_KEY, SENDER_EMAIL).
+- `backend/requirements.txt` — Python dependencies.
 
-- Create and activate a virtual environment (if not already):
+Quick start — single-file server (recommended for easiest deployment)
+
+1. Create and activate a Python virtual environment (PowerShell):
 
 ```powershell
-cd backend
+cd C:\Users\Shambhu\Desktop\email_send
 python -m venv venv
 .\venv\Scripts\Activate.ps1
 ```
 
-- Install dependencies (if a `requirements.txt` exists):
+2. Install dependencies:
 
 ```powershell
-pip install -r requirements.txt
+pip install -r backend\requirements.txt
 ```
 
-- Start the backend API (adjust the command to your app's entrypoint):
+3. (Optional) Configure environment variables — create a `.env` in the repository root or set variables in your environment:
+
+```
+SENDGRID_API_KEY=your_sendgrid_api_key
+SENDER_EMAIL=you@yourdomain.com
+```
+
+4. Run the single-file server:
 
 ```powershell
-# Example using uvicorn for a FastAPI app
-uvicorn main:app --reload --host 0.0.0.0 --port 8000
+python single_app.py
+# Open http://localhost:8000 in the browser
 ```
 
-2. Frontend (static)
+Notes: when running `single_app.py` the frontend is served at `/` and API endpoints are on the same origin (`/send-excel-mails`, `/send-manual-mails`). This avoids CORS and makes deployment as a single process easier.
 
-- Serve files from `frontend/` (open `frontend/index.html` directly in the browser or use a simple static server):
+Alternative — run the backend only and open static frontend separately
 
-```powershell
-# From workspace root, using Python's HTTP server
-cd frontend
-python -m http.server 5500
-# Then open http://localhost:5500 in your browser
-```
+- Serve `backend/index.html` with a static server and run `backend/main.py` with `uvicorn main:app` if you prefer separating processes.
 
-3. Using the app
+Git notes
 
-- In the UI enter your email template (use `<<Name>>` and `<<Amount>>` placeholders).
-- Use the Excel upload area to choose an Excel file or use manual entry.
-- Click the send button to invoke the backend endpoint. Responses and logs appear in the UI's logs area.
-
-Important notes about Git and repository layout
-
-- This workspace currently contains two Git repositories:
-  - The root `email_send` repository (remote: `https://github.com/Shambhu7714/bulk-mail-send-.git`).
-  - A nested `backend` repository at `backend/` (this is an independent repo inside the root repo).
-
-- Because `backend` is a separate repository (it has its own `.git`), committing and pushing from the root repo does NOT automatically include the internal `backend` repository's commits or untracked files. If you want the `backend` code to be part of the root repository, you must remove the nested `.git` inside `backend` (this will make `backend` tracked by the root repo) or adopt a submodule/subtree approach.
-
-Common Git actions
-
-- Push root repo to GitHub (already set):
-
-```powershell
-Set-Location 'C:\Users\Shambhu\Desktop\email_send'
-# push current branch (e.g. dev)
-git push -u origin dev
-```
-
-- Commit & push inside `backend` (if you want `backend` repo contents on its remote):
-
-```powershell
-Set-Location 'C:\Users\Shambhu\Desktop\email_send\backend'
-# stage and commit files
-git add .
-git commit -m "Add backend source files"
-# push dev
-git push -u origin dev
-```
-
-- Convert `backend` into part of the root repository (if desired):
-
-```powershell
-# WARNING: this removes the nested repo metadata. Backup if needed.
-Remove-Item -LiteralPath 'C:\Users\Shambhu\Desktop\email_send\backend\.git' -Recurse -Force
-Set-Location 'C:\Users\Shambhu\Desktop\email_send'
-git add backend
-git commit -m "Add backend files into root repo"
-git push -u origin dev
-```
+- The repository remote was set to `https://github.com/Shambhu7714/bulk-mail-send-.git` previously.
+- A branch `mail-send` was created that contains the consolidated frontend. You can create a pull request from that branch if you want to merge these changes.
+- I have left commits local or pushed only to branches you requested; confirm before doing any additional pushes to PR/merge.
 
 Security & credentials
 
-- For GitHub pushes over HTTPS you will need a GitHub Personal Access Token (PAT) instead of your password. Create one at https://github.com/settings/tokens with `repo` scope and use it as the password when prompted.
-- For sending emails, keep SMTP credentials or API keys out of source control. Use environment variables or a `.env` file (and add it to `.gitignore`).
+- For GitHub pushes over HTTPS use a Personal Access Token (PAT) when prompted for a password.
+- Keep SendGrid API keys and sender email out of source control (use `.env` and add `.env` to `.gitignore`).
 
-Next recommended steps
+Next steps (suggested)
 
-- Commit any remaining changes in `backend` and push from that repository (or tell me if you want me to remove the nested `.git` and add `backend` to the root repo).
-- If you want, I can add a small `README` section with API endpoint docs if you point me to the backend code (e.g. `main.py` or `app.py`).
+- Run the app locally with `python single_app.py` and test the UI and email sending (use test SendGrid/API keys or stub out `send_email_dynamic` for dry runs).
+- If you'd like, I can remove the old backend-only files or fully convert the repo to the single-file layout (delete backups). Tell me whether to commit and push the consolidation branch (`mail-send`) or wait.
 
-If you'd like any edits to this README (formatting, more details, API docs, or deployment instructions), tell me what to add and I'll update it.
+If you'd like more details in the README (example Excel file, API response format, or deployment instructions for a cloud provider), tell me which and I'll add it.
