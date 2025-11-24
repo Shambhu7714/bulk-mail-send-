@@ -5,7 +5,7 @@ A small project for sending personalized voucher emails in bulk using an Excel f
 
 Current repository layout (consolidated)
 
-- `single_app.py` — Optional single-file server (at repository root). When run this serves the frontend and exposes the same API endpoints; useful for easy single-file deployment.
+- `main.py` — Optional single-file server (at repository root). When run this serves the frontend and exposes the same API endpoints; useful for easy single-file deployment.
 - `backend/` — Primary backend folder. It now contains `index.html` (the full frontend inlined), backend Python code (`main.py`, `email_sender.py`, `config.py`), and `requirements.txt`.
 
 What changed
