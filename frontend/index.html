@@ -41,7 +41,10 @@ Team Bajaj Finserv Health
       <label class="label">Excel File</label>
       <input type="file" id="excelFile" class="input">
 
-      <button onclick="sendExcel()" class="button primary">Send Emails from Excel</button>
+      <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
+        <button onclick="downloadExcel()" class="button">Download Sample Excel</button>
+        <button onclick="sendExcel()" class="button primary">Send Emails from Excel</button>
+      </div>
     </div>
 
     <div class="card">

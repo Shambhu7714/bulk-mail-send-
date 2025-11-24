@@ -85,3 +85,25 @@ async function sendManual() {
     output.textContent = "Error: " + err;
   }
 }
+
+// Download a CSV template that Excel can open
+function downloadExcel() {
+  const headers = ['Executive Name', 'Email', 'Voucher Amount'];
+  const rows = [
+    ['Rahul Sharma', 'rahul@example.com', '500'],
+    ['Priya Singh', 'priya@example.com', '1000']
+  ];
+
+  const escapeCell = (cell) => '"' + String(cell).replace(/"/g, '""') + '"';
+  const csv = [headers, ...rows].map(r => r.map(escapeCell).join(',')).join('\r\n');
+
+  const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = 'sample_voucher_template.csv';
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+  URL.revokeObjectURL(url);
+}
