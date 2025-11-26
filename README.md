@@ -1,109 +1,315 @@
-# Bulk Mail Sender
+Below is a **clean, professional, production-ready `README.md`** written **exactly for your current project structure**:
 
-A small project for sending personalized voucher emails in bulk using an Excel file or manual entry.
-
-Project structure
-
-- `backend/` — Python backend (API endpoints to accept Excel uploads or manual requests and send emails).
-- `frontend/` — Static frontend (HTML + JS) to upload Excel files, enter email template and trigger sending.
-
-Features
-
-- Send personalized emails by uploading an Excel with columns `Executive Name`, `Email`, `Voucher Amount`.
-- Manual mode for sending to a comma-separated list of emails with a single name/amount.
-- Simple logging output in the UI.
-- A sample Excel download button in the frontend (creates a CSV/XLSX-styled template).
-
-Quick start (Windows, PowerShell)
-
-1. Backend (Python)
-
-- Create and activate a virtual environment (if not already):
-
-```powershell
-cd backend
-python -m venv venv
-.\venv\Scripts\Activate.ps1
+```
+EMAIL_SEND/
+│── backend/
+│    ├── main.py
+│    ├── email_sender.py
+│    ├── config.py
+│    ├── index.html
+│    ├── requirements.txt
+│    ├── Dockerfile
+│    ├── .env
+│    ├── .gitignore
+│    └── venv/  (ignored)
 ```
 
-- Install dependencies (if a `requirements.txt` exists):
+The README includes:
 
-```powershell
+✔ Installation
+✔ Environment setup
+✔ Running backend
+✔ Accessing frontend
+✔ Using Excel upload
+✔ Manual email sending
+✔ Docker instructions
+✔ API reference
+✔ Production deployment notes
+
+---
+
+# ⭐ **FINAL README.md**
+
+Copy–paste into your `backend/README.md`
+
+---
+
+# 📧 Bulk Email Sender – Excel & Manual (FastAPI + SendGrid)
+
+This project is a **full-featured bulk email sender** that allows sending personalized emails to recipients using:
+
+* **Excel Upload**
+* **Manual Email Entry**
+
+The frontend UI is contained inside a **single `index.html` file** and is served directly by FastAPI.
+
+The backend handles:
+
+* Dynamic template placeholders (`<<Name>>`, `<<Amount>>`)
+* SendGrid email delivery
+* Excel parsing
+* Clean JSON response logs
+
+---
+
+## 📁 Project Structure
+
+```
+backend/
+│── main.py               # FastAPI backend + UI serving
+│── email_sender.py       # SendGrid email sending module
+│── config.py             # API keys & configuration
+│── index.html            # Single-file frontend (HTML+CSS+JS)
+│── requirements.txt      # Dependencies
+│── Dockerfile            # Docker image for deployment
+│── .env                  # Environment variables (NOT committed)
+│── .gitignore
+│── venv/                 # Virtual environment (ignored)
+```
+
+---
+
+## 🚀 Features
+
+### ✔ Single-file UI (`index.html`)
+
+Contains all HTML + CSS + JavaScript for:
+
+* Email template editor
+* Excel upload
+* Manual email sending
+* Logs output section
+
+### ✔ Dynamic Template Rendering
+
+Supports placeholders:
+
+* `<<Name>>`
+* `<<Amount>>`
+
+### ✔ Send Email Using Excel
+
+Excel must contain:
+
+* **Executive Name**
+* **Email**
+* **Voucher Amount**
+
+### ✔ Manual Email Sending
+
+User enters:
+
+* Recipients (comma-separated)
+* Name
+* Amount
+* Subject
+* Template
+
+### ✔ Logs Returned to UI
+
+Shows:
+
+* Sent emails
+* Failed emails
+* Debug info
+
+---
+
+## 🛠 Installation & Setup
+
+### 1. Clone the project
+
+```
+git clone <your-repo>
+cd EMAIL_SEND/backend
+```
+
+### 2. Create virtual environment
+
+```
+python -m venv venv
+venv\Scripts\activate   # Windows
+```
+
+### 3. Install dependencies
+
+```
 pip install -r requirements.txt
 ```
 
-- Start the backend API (adjust the command to your app's entrypoint):
+### 4. Create `.env` file
 
-```powershell
-# Example using uvicorn for a FastAPI app
-uvicorn main:app --reload --host 0.0.0.0 --port 8000
+Inside `backend/.env`:
+
+```
+SENDGRID_API_KEY=YOUR_SENDGRID_KEY_HERE
+SENDER_EMAIL=bajaj.finservhealth@almonds.ai
 ```
 
-2. Frontend (static)
+---
 
-- Serve files from `frontend/` (open `frontend/index.html` directly in the browser or use a simple static server):
+## ▶️ Running the Server
 
-```powershell
-# From workspace root, using Python's HTTP server
-cd frontend
-python -m http.server 5500
-# Then open http://localhost:5500 in your browser
+Run:
+
+```
+python main.py
 ```
 
-3. Using the app
+You should see:
 
-- In the UI enter your email template (use `<<Name>>` and `<<Amount>>` placeholders).
-- Use the Excel upload area to choose an Excel file or use manual entry.
-- Click the send button to invoke the backend endpoint. Responses and logs appear in the UI's logs area.
-
-Important notes about Git and repository layout
-
-- This workspace currently contains two Git repositories:
-  - The root `email_send` repository (remote: `https://github.com/Shambhu7714/bulk-mail-send-.git`).
-  - A nested `backend` repository at `backend/` (this is an independent repo inside the root repo).
-
-- Because `backend` is a separate repository (it has its own `.git`), committing and pushing from the root repo does NOT automatically include the internal `backend` repository's commits or untracked files. If you want the `backend` code to be part of the root repository, you must remove the nested `.git` inside `backend` (this will make `backend` tracked by the root repo) or adopt a submodule/subtree approach.
-
-Common Git actions
-
-- Push root repo to GitHub (already set):
-
-```powershell
-Set-Location 'C:\Users\Shambhu\Desktop\email_send'
-# push current branch (e.g. dev)
-git push -u origin dev
+```
+Uvicorn running on http://0.0.0.0:8000
 ```
 
-- Commit & push inside `backend` (if you want `backend` repo contents on its remote):
+---
 
-```powershell
-Set-Location 'C:\Users\Shambhu\Desktop\email_send\backend'
-# stage and commit files
-git add .
-git commit -m "Add backend source files"
-# push dev
-git push -u origin dev
+## 🌐 Access the UI
+
+Open in browser:
+
+```
+http://localhost:8000
 ```
 
-- Convert `backend` into part of the root repository (if desired):
+This automatically loads the **index.html** UI from FastAPI.
 
-```powershell
-# WARNING: this removes the nested repo metadata. Backup if needed.
-Remove-Item -LiteralPath 'C:\Users\Shambhu\Desktop\email_send\backend\.git' -Recurse -Force
-Set-Location 'C:\Users\Shambhu\Desktop\email_send'
-git add backend
-git commit -m "Add backend files into root repo"
-git push -u origin dev
+---
+
+## 🧪 API Endpoints
+
+### **POST /send-excel-mails**
+
+Send personalized emails using Excel.
+
+Form fields:
+
+* file (Excel)
+* subject
+* template (HTML template)
+
+### **POST /send-manual-mails**
+
+Send personalized emails manually.
+
+Form fields:
+
+* emails
+* name
+* amount
+* subject
+* template
+
+---
+
+## 📦 Running with Docker
+
+### 1. Build Docker image
+
+```
+docker build -t bulk-mailer .
 ```
 
-Security & credentials
+### 2. Run container
 
-- For GitHub pushes over HTTPS you will need a GitHub Personal Access Token (PAT) instead of your password. Create one at https://github.com/settings/tokens with `repo` scope and use it as the password when prompted.
-- For sending emails, keep SMTP credentials or API keys out of source control. Use environment variables or a `.env` file (and add it to `.gitignore`).
+```
+docker run -p 8000:8000 --env-file .env bulk-mailer
+```
 
-Next recommended steps
+### 3. Open browser
 
-- Commit any remaining changes in `backend` and push from that repository (or tell me if you want me to remove the nested `.git` and add `backend` to the root repo).
-- If you want, I can add a small `README` section with API endpoint docs if you point me to the backend code (e.g. `main.py` or `app.py`).
+```
+http://localhost:8000
+```
 
-If you'd like any edits to this README (formatting, more details, API docs, or deployment instructions), tell me what to add and I'll update it.
+---
+
+## 📬 Excel Requirements
+
+Your Excel file **must** have the following columns:
+
+| Executive Name | Email                                         | Voucher Amount |
+| -------------- | --------------------------------------------- | -------------- |
+| Rahul Sharma   | [email@example.com](mailto:email@example.com) | 1000           |
+| Ankit Singh    | [test@gmail.com](mailto:test@gmail.com)       | 500            |
+
+---
+
+## 🎨 Template Placeholders
+
+Your email template can include:
+
+```
+<<Name>>
+<<Amount>>
+```
+
+FastAPI will replace them dynamically.
+
+Example:
+
+```html
+<p>Dear <<Name>>,</p>
+<p>You have won ₹<<Amount>> Amazon voucher!</p>
+```
+
+---
+
+## 📝 Logs
+
+Each request returns:
+
+* email
+* name
+* amount
+* status (“sent”, “failed”, “error”)
+
+Example:
+
+```json
+{
+  "message": "Emails sent successfully",
+  "logs": [
+    {
+      "email": "test@gmail.com",
+      "name": "Rahul",
+      "amount": "1000",
+      "status": "sent"
+    }
+  ]
+}
+```
+
+---
+
+## 🛡 Production Deployment Notes
+
+For production, use:
+
+* Docker
+* NGINX reverse proxy
+* Uvicorn workers (`--workers 4`)
+* HTTPS (Let's Encrypt)
+
+I can generate a full production setup if you need it.
+
+---
+
+## ❤️ Support or Improvements?
+
+Tell me if you want:
+
+* 🔧 CSV support
+* 🔐 Admin login system
+* 🎨 Branded HTML template
+* 📊 Dashboard to track sent emails
+* 📨 Attachments support
+* 🚀 Auto-retry & queue system
+
+---
+
+# ✅ Project is now fully documented and deployment-ready 🚀
+
+If you want the **production NGINX server setup**, just say:
+
+👉 **“Create production deployment guide”**

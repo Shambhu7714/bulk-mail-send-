@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <title>Bulk Mail Sender</title>
+
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #f4f6fb;
+      margin: 0;
+      padding: 0;
+    }
+
+    .container {
+      max-width: 900px;
+      margin: 20px auto;
+      padding: 16px;
+    }
+
+    h1 {
+      text-align: center;
+      margin-bottom: 10px;
+    }
+
+    .subtitle {
+      text-align: center;
+      color: #555;
+      margin-top: 0;
+      margin-bottom: 20px;
+    }
+
+    .card {
+      background: #fff;
+      border-radius: 10px;
+      margin-bottom: 20px;
+      padding: 16px 20px;
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.06);
+    }
+
+    .label {
+      display: block;
+      font-weight: bold;
+      margin-top: 10px;
+    }
+
+    .input,
+    textarea {
+      width: 100%;
+      padding: 8px 10px;
+      border-radius: 6px;
+      border: 1px solid #ccc;
+      font-size: 14px;
+      margin-top: 4px;
+    }
+
+    textarea {
+      min-height: 130px;
+    }
+
+    .button {
+      width: 100%;
+      padding: 10px;
+      margin-top: 12px;
+      background: #004cff;
+      color: white;
+      border: none;
+      border-radius: 6px;
+      font-size: 16px;
+      cursor: pointer;
+      font-weight: bold;
+    }
+
+    .button:hover {
+      opacity: 0.9;
+    }
+
+    .success {
+      background: #10b981;
+    }
+
+    .output {
+      background: #000;
+      color: #0f0;
+      padding: 10px;
+      border-radius: 6px;
+      font-size: 12px;
+      max-height: 300px;
+      overflow: auto;
+      white-space: pre-wrap;
+    }
+  </style>
+
+</head>
+
+<body>
+
+  <div class="container">
+    <h1>📤 Bulk Mail Sender</h1>
+    <p class="subtitle">Send personalized emails using Excel or manual input</p>
+
+    <!-- TEMPLATE BOX -->
+    <div class="card">
+      <h2>✏️ Email Template</h2>
+
+      <textarea id="templateBox">
+<p>Dear <<Name>>, </p>
+
+<p>
+Congratulations on winning Amazon Voucher worth 
+<strong>₹<<Amount>></strong> with Bajaj Finserv Health Family.
+</p>
+
+<p>
+To receive your voucher code, click on the “I Confirm” button below.  
+This will open a new email draft—just press <strong>Send</strong> and your voucher code
+will be shared with you in the reply.
+</p>
+
+<p>
+Enjoy your reward and thank you once again for being part of the Bajaj Finserv Health Family.
+</p>
+
+<p>
+Best regards,<br>
+<strong>Team Bajaj Finserv Health</strong>
+</p>
+      </textarea>
+    </div>
+
+    <!-- EXCEL SECTION -->
+    <div class="card">
+      <h2>📁 Send Using Excel File</h2>
+
+      <label class="label">Email Subject</label>
+      <input type="text" id="excelSubject" class="input" placeholder="Voucher Code - Congratulations!">
+
+      <label class="label">Upload Excel (Executive Name, Email, Voucher Amount)</label>
+      <input type="file" id="excelFile" class="input">
+
+      <button class="button" onclick="sendExcel()">Send Emails from Excel</button>
+    </div>
+
+    <!-- MANUAL SECTION -->
+    <div class="card">
+      <h2>✉️ Manual Email Sending</h2>
+
+      <label class="label">Emails (comma separated)</label>
+      <textarea id="manualEmails" placeholder="email1@example.com, email2@example.com"></textarea>
+
+      <label class="label">Name</label>
+      <input type="text" id="manualName" class="input">
+
+      <label class="label">Amount</label>
+      <input type="text" id="manualAmount" class="input">
+
+      <label class="label">Email Subject</label>
+      <input type="text" id="manualSubject" class="input">
+
+      <button class="button success" onclick="sendManual()">Send Manual Emails</button>
+    </div>
+
+    <!-- OUTPUT LOGS -->
+    <div class="card">
+      <h2>📋 Logs</h2>
+      <pre id="output" class="output"></pre>
+    </div>
+
+  </div>
+
+
+  <!-- JS SECTION -->
+  <script>
+    const API = window.location.origin; // auto-detect backend same domain
+
+    function getTemplate() {
+      return document.getElementById("templateBox").value;
+    }
+
+    async function sendExcel() {
+      const fileInput = document.getElementById("excelFile");
+      const subject = document.getElementById("excelSubject").value;
+      const template = getTemplate();
+      const output = document.getElementById("output");
+
+      if (!fileInput.files[0]) {
+        alert("Please upload Excel file");
+        return;
+      }
+
+      const form = new FormData();
+      form.append("file", fileInput.files[0]);
+      form.append("subject", subject);
+      form.append("template", template);
+
+      output.innerHTML = "⏳ Sending emails using Excel...";
+
+      const res = await fetch(`${API}/send-excel-mails`, { method: "POST", body: form });
+      const data = await res.json();
+
+      output.innerHTML = JSON.stringify(data, null, 2);
+    }
+
+    async function sendManual() {
+      const emails = document.getElementById("manualEmails").value;
+      const name = document.getElementById("manualName").value;
+      const amount = document.getElementById("manualAmount").value;
+      const subject = document.getElementById("manualSubject").value;
+      const template = getTemplate();
+      const output = document.getElementById("output");
+
+      const form = new FormData();
+      form.append("emails", emails);
+      form.append("name", name);
+      form.append("amount", amount);
+      form.append("subject", subject);
+      form.append("template", template);
+
+      output.innerHTML = "⏳ Sending manual emails...";
+
+      const res = await fetch(`${API}/send-manual-mails`, { method: "POST", body: form });
+      const data = await res.json();
+
+      output.innerHTML = JSON.stringify(data, null, 2);
+    }
+  </script>
+
+</body>
+</html>
