@@ -6,6 +6,7 @@
   <title>Bulk Mail Sender</title>
 
   <style>
+    /* same styles as before (unchanged) */
     body {
       font-family: Arial, sans-serif;
       background: #f4f6fb;
@@ -133,6 +134,9 @@ Best regards,<br>
     <div class="card">
       <h2>📁 Send Using Excel File</h2>
 
+      <label class="label">Sender Email (optional)</label>
+      <input type="text" id="excelSender" class="input" placeholder="leave blank to use default server sender">
+
       <label class="label">Email Subject</label>
       <input type="text" id="excelSubject" class="input" placeholder="Voucher Code - Congratulations!">
 
@@ -145,6 +149,9 @@ Best regards,<br>
     <!-- MANUAL SECTION -->
     <div class="card">
       <h2>✉️ Manual Email Sending</h2>
+
+      <label class="label">Sender Email (optional)</label>
+      <input type="text" id="manualSender" class="input" placeholder="leave blank to use default server sender">
 
       <label class="label">Emails (comma separated)</label>
       <textarea id="manualEmails" placeholder="email1@example.com, email2@example.com"></textarea>
@@ -162,17 +169,28 @@ Best regards,<br>
     </div>
 
     <!-- OUTPUT LOGS -->
+    <!-- <div class="card">
+      <h2>📋 Logs</h2>
+      <pre id="output" class="output"></pre>
+    </div> -->
     <div class="card">
       <h2>📋 Logs</h2>
       <pre id="output" class="output"></pre>
-    </div>
 
+      <button class="button" style="background:#16a34a" onclick="downloadLogs()">
+        ⬇️ Download Logs
+      </button>
+    </div>
   </div>
 
 
   <!-- JS SECTION -->
   <script>
-    const API = window.location.origin; // auto-detect backend same domain
+    // Use explicit backend URL so API calls go to the FastAPI server
+    // When serving frontend with `python -m http.server` the origin will be
+    // the static server (port 5500) which does not proxy API requests.
+    // Set this to your backend URL (uvicorn) during local testing.
+    const API = "http://127.0.0.1:8000";
 
     function getTemplate() {
       return document.getElementById("templateBox").value;
@@ -182,6 +200,7 @@ Best regards,<br>
       const fileInput = document.getElementById("excelFile");
       const subject = document.getElementById("excelSubject").value;
       const template = getTemplate();
+      const sender = document.getElementById("excelSender").value;
       const output = document.getElementById("output");
 
       if (!fileInput.files[0]) {
@@ -193,13 +212,17 @@ Best regards,<br>
       form.append("file", fileInput.files[0]);
       form.append("subject", subject);
       form.append("template", template);
+      if (sender && sender.trim()) form.append("sender", sender.trim()); // optional
 
       output.innerHTML = "⏳ Sending emails using Excel...";
 
-      const res = await fetch(`${API}/send-excel-mails`, { method: "POST", body: form });
-      const data = await res.json();
-
-      output.innerHTML = JSON.stringify(data, null, 2);
+      try {
+        const res = await fetch(`${API}/send-excel-mails`, { method: "POST", body: form });
+        const data = await res.json();
+        output.innerHTML = JSON.stringify(data, null, 2);
+      } catch (err) {
+        output.innerHTML = `Error: ${err.message}`;
+      }
     }
 
     async function sendManual() {
@@ -208,6 +231,7 @@ Best regards,<br>
       const amount = document.getElementById("manualAmount").value;
       const subject = document.getElementById("manualSubject").value;
       const template = getTemplate();
+      const sender = document.getElementById("manualSender").value;
       const output = document.getElementById("output");
 
       const form = new FormData();
@@ -216,14 +240,39 @@ Best regards,<br>
       form.append("amount", amount);
       form.append("subject", subject);
       form.append("template", template);
+      if (sender && sender.trim()) form.append("sender", sender.trim()); // optional
 
       output.innerHTML = "⏳ Sending manual emails...";
 
-      const res = await fetch(`${API}/send-manual-mails`, { method: "POST", body: form });
-      const data = await res.json();
-
-      output.innerHTML = JSON.stringify(data, null, 2);
+      try {
+        const res = await fetch(`${API}/send-manual-mails`, { method: "POST", body: form });
+        const data = await res.json();
+        output.innerHTML = JSON.stringify(data, null, 2);
+      } catch (err) {
+        output.innerHTML = `Error: ${err.message}`;
+      }
     }
+    function downloadLogs() {
+      const content = document.getElementById("output").innerText;
+
+      if (!content.trim()) {
+        alert("No logs available to download");
+        return;
+      }
+
+      const fileName = `email_logs_${new Date().toISOString().replace(/[:.]/g, '-')}.txt`;
+      const blob = new Blob([content], { type: "text/plain" });
+      const url = URL.createObjectURL(blob);
+
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = fileName;
+      a.click();
+
+      URL.revokeObjectURL(url);
+    }
+
+
   </script>
 
 </body>

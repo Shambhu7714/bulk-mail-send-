@@ -1,3 +1,58 @@
+# from sendgrid import SendGridAPIClient
+# from sendgrid.helpers.mail import Mail
+# from config import SENDGRID_API_KEY, SENDER_EMAIL
+
+
+# # ---------------------------------------------------------
+# #  Replace placeholders with dynamic values
+# # ---------------------------------------------------------
+# def build_dynamic_message(template: str, name: str, amount: str) -> str:
+#     """
+#     Replaces placeholders in the HTML template:
+#        <<Name>>
+#        <<Amount>>
+#     """
+#     return (
+#         template.replace("<<Name>>", str(name))
+#                 .replace("<<Amount>>", str(amount))
+#     )
+
+
+# # ---------------------------------------------------------
+# #  Send a dynamic HTML email using SendGrid
+# # ---------------------------------------------------------
+# def send_email_dynamic(receiver: str, subject: str, html_content: str) -> str:
+#     """
+#     Sends HTML email to a single receiver.
+#     Returns: "sent", "failed (code)", or "error: ..."
+#     """
+
+#     try:
+#         message = Mail(
+#             from_email=SENDER_EMAIL,
+#             to_emails=receiver,
+#             subject=subject,
+#             html_content=html_content
+#         )
+
+#         sg = SendGridAPIClient(SENDGRID_API_KEY)
+#         response = sg.send(message)
+
+#         status_code = response.status_code
+
+#         # Logging
+#         if 200 <= status_code < 300:
+#             print(f"[SENT] {receiver}  Status={status_code}")
+#             return "sent"
+#         else:
+#             print(f"[FAILED] {receiver}  Status={status_code}")
+#             return f"failed ({status_code})"
+
+#     except Exception as e:
+#         print(f"[ERROR] {receiver}  Error={str(e)}")
+#         return f"error: {str(e)}"
+
+
 from sendgrid import SendGridAPIClient
 from sendgrid.helpers.mail import Mail
 from config import SENDGRID_API_KEY, SENDER_EMAIL
@@ -21,15 +76,18 @@ def build_dynamic_message(template: str, name: str, amount: str) -> str:
 # ---------------------------------------------------------
 #  Send a dynamic HTML email using SendGrid
 # ---------------------------------------------------------
-def send_email_dynamic(receiver: str, subject: str, html_content: str) -> str:
+def send_email_dynamic(receiver: str, subject: str, html_content: str, sender: str = None) -> str:
     """
     Sends HTML email to a single receiver.
+    sender: optional override for the From email. If None, SENDER_EMAIL from config is used.
     Returns: "sent", "failed (code)", or "error: ..."
     """
 
     try:
+        from_email = sender if sender else SENDER_EMAIL
+
         message = Mail(
-            from_email=SENDER_EMAIL,
+            from_email=from_email,
             to_emails=receiver,
             subject=subject,
             html_content=html_content
@@ -42,12 +100,12 @@ def send_email_dynamic(receiver: str, subject: str, html_content: str) -> str:
 
         # Logging
         if 200 <= status_code < 300:
-            print(f"[SENT] {receiver}  Status={status_code}")
+            print(f"[SENT] {receiver}  From={from_email}  Status={status_code}")
             return "sent"
         else:
-            print(f"[FAILED] {receiver}  Status={status_code}")
+            print(f"[FAILED] {receiver}  From={from_email}  Status={status_code}")
             return f"failed ({status_code})"
 
     except Exception as e:
-        print(f"[ERROR] {receiver}  Error={str(e)}")
+        print(f"[ERROR] {receiver}  From={sender if sender else SENDER_EMAIL}  Error={str(e)}")
         return f"error: {str(e)}"
