@@ -214,12 +214,19 @@ Best regards,<br>
       form.append("template", template);
       if (sender && sender.trim()) form.append("sender", sender.trim()); // optional
 
-      output.innerHTML = "⏳ Sending emails using Excel...";
+      output.innerHTML = "⏳ Starting background process...";
 
       try {
         const res = await fetch(`${API}/send-excel-mails`, { method: "POST", body: form });
         const data = await res.json();
-        output.innerHTML = JSON.stringify(data, null, 2);
+        
+        if (data.task_id) {
+          pollTaskStatus(data.task_id);
+        } else if (data.error) {
+          output.innerHTML = `Error: ${data.error}`;
+        } else {
+          output.innerHTML = JSON.stringify(data, null, 2);
+        }
       } catch (err) {
         output.innerHTML = `Error: ${err.message}`;
       }
@@ -242,15 +249,66 @@ Best regards,<br>
       form.append("template", template);
       if (sender && sender.trim()) form.append("sender", sender.trim()); // optional
 
-      output.innerHTML = "⏳ Sending manual emails...";
+      output.innerHTML = "⏳ Starting background process...";
 
       try {
         const res = await fetch(`${API}/send-manual-mails`, { method: "POST", body: form });
         const data = await res.json();
-        output.innerHTML = JSON.stringify(data, null, 2);
+        
+        if (data.task_id) {
+          pollTaskStatus(data.task_id);
+        } else if (data.error) {
+          output.innerHTML = `Error: ${data.error}`;
+        } else {
+          output.innerHTML = JSON.stringify(data, null, 2);
+        }
       } catch (err) {
         output.innerHTML = `Error: ${err.message}`;
       }
+    }
+
+    async function pollTaskStatus(taskId) {
+      const output = document.getElementById("output");
+      
+      // Clear previous logs
+      output.innerHTML = "⏳ Initializing...";
+
+      const interval = setInterval(async () => {
+        try {
+          const res = await fetch(`${API}/task-status/${taskId}`);
+          const data = await res.json();
+          
+          if (data.error) {
+            output.innerHTML = `Error: ${data.error}`;
+            clearInterval(interval);
+            return;
+          }
+
+          let logText = `⏳ Status: ${data.status.toUpperCase()} (${data.current}/${data.total})\n`;
+          logText += `----------------------------------------\n`;
+          
+          if (data.logs && data.logs.length > 0) {
+            data.logs.forEach(log => {
+              const statusSymbol = log.status === "sent" ? "✅" : "❌";
+              logText += `${statusSymbol} [${log.index}/${data.total}] ${log.name} | ${log.email} | ₹${log.amount} | ${log.status}\n`;
+            });
+          } else {
+            logText += "Waiting for logs...\n";
+          }
+
+          output.innerHTML = logText;
+
+          if (data.status === "completed") {
+            clearInterval(interval);
+            output.innerHTML += `\n✨ Done! Process completed.`;
+            // Scroll to bottom
+            output.scrollTop = output.scrollHeight;
+          }
+        } catch (err) {
+          console.error("Polling error:", err);
+          // Don't stop interval on network error, server might be restarting or busy
+        }
+      }, 2000);
     }
     function downloadLogs() {
       const content = document.getElementById("output").innerText;
